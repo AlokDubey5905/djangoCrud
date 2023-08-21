@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'books',
+    'blogs',
 ]
 
 MIDDLEWARE = [
@@ -122,3 +122,9 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# changes by Alok
+SESSION_COOKIE_AGE = 1800  # 1 hour in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Expires when the browser is closed
+SESSION_SAVE_EVERY_REQUEST = True  # Save session data on every request

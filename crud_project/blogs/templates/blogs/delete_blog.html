@@ -1,0 +1,11 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+  <h2>Delete Book</h2>
+  <p>Are you sure you want to delete the blog: {{ blog.title }} by {{blog.name}} ?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Delete</button>
+  </form>
+  <a href="{% url 'blog_list' %}">Back to Blog List</a>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <h2>Add Blog</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{form.as_p}}
+        <button type="submit">Save</button>
+    </form>
+    <a href="{% url 'blog_list' %}">Back to Blog List</a>
+{% endblock %}

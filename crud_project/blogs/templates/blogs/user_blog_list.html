@@ -1,0 +1,30 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+{% if user.is_authenticated %}
+        <div>
+            <h2>Welcome {{user.username}}!!</h2>
+            <a href="{% url 'blog_list' %}">All Blogs</a> |
+            <a href="{% url 'add_blog' %}" class="btn btn-primary">Add Blog</a> |
+            <a href="{% url 'logout' %}">Sign Out</a>
+        </div>
+        <h2>{{ user.username }} Blogs</h2>
+        <div class="blogs-section">
+            {% for blog in your_blogs %}
+                <div class="blog">
+                    <h3>{{ blog.title }} by {{ blog.name }}</h3>
+                    <p>
+                        {{ blog.content }}
+                    </p>
+                    <p>
+                        {{ blog.created_at }}
+                    </p>
+                    {% if user == blog.author %}
+                        <!-- Display Edit and Delete buttons -->
+                        <a href="{% url 'edit_blog' blog.id %}">Edit</a>
+                        <a href="{% url 'delete_blog' blog.id %}">Delete</a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

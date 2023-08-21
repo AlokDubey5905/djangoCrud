@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+    {% if not user.is_authenticated %}
+        <div>
+            <p>
+                Welcome! Sign in or sign up to manage your blogs.
+            </p>
+            <a href="{% url 'login' %}">Sign In</a> |
+            <a href="{% url 'signup' %}">Sign Up</a>
+        </div>
+        <h2>Blogs</h2>
+        <div class="blogs-section">
+            {% for blog in blogs %}
+                <div class="blog">
+                    <h3>{{ blog.title }} by {{ blog.name }}</h3>
+                    <p>
+                        {{ blog.content }}
+                    </p>
+                    <p>
+                        {{ blog.created_at }}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <div>
+            <h2>Welcome {{user.username}}!!</h2>
+            <a href="{% url 'user_blog_list' %}">Your Blogs</a> |
+            <a href="{% url 'add_blog' %}" class="btn btn-primary">Add Blog</a> |
+            <a href="{% url 'logout' %}">Sign Out</a>
+        </div>
+        <h2>All Blogs</h2>
+        <div class="blogs-section">
+            {% for blog in blogs %}
+                <div class="blog">
+                    <h3>{{ blog.title }} by {{ blog.name }}</h3>
+                    <p>
+                        {{ blog.content }}
+                    </p>
+                    <p>
+                        {{ blog.created_at }}
+                    </p>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}
