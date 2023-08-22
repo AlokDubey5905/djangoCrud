@@ -4,9 +4,11 @@ from .models import Blog
 from .forms import BlogForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth import login, authenticate, logout
-
-# Create your views here.
+from django.contrib.auth import login, authenticate, logout, get_user_model
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .serializers import BlogSerializer
 
 
 def blog_list(request):
@@ -123,3 +125,77 @@ def user_login(request):
 def user_logout(request):
     logout(request)
     return redirect('blog_list')
+
+
+# api views.
+
+
+@api_view(['GET'])
+def all_blogs_api(request):
+    blogs = Blog.objects.all()
+    serializer = BlogSerializer(blogs, many=True)
+    return Response(serializer.data)
+
+
+# user specific blogs
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@login_required
+def user_blogs_api(request):
+    blogs = Blog.objects.filter(author=request.user)
+    serializer = BlogSerializer(blogs, many=True)
+    return Response(serializer.data)
+
+@api_view(['POST'])
+@permission_classes([AllowAny])  # Allow anyone to login
+def login_api(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        return Response({'message': 'User logged in successfully.'}, status=200)
+    else:
+        return Response({'error': 'Invalid username or password.'}, status=401)
+
+
+@api_view(['POST'])
+# Allow only authenticated users to logout
+@login_required
+@permission_classes([IsAuthenticated])
+def logout_api(request):
+    logout(request)
+    return Response({'message': 'User logged out successfully.'}, status=200)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])  # Allow only authenticated users
+def current_user_api(request):
+    user_data = {
+        'is_authenticated': True,
+        'username': request.user.username,
+    }
+    return Response(user_data)
+
+
+User = get_user_model()
+
+
+@api_view(['POST'])
+def signup_api(request):
+    if request.method == 'POST':
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        if username and password:
+            try:
+                user = User.objects.create_user(
+                    username=username, password=password)
+                login(request, user)
+                return Response({'message': 'User registered and logged in successfully.'})
+            except:
+                return Response({'message': 'User registration failed.'}, status=400)
+
+    return Response({'message': 'Invalid data provided.'}, status=400)
