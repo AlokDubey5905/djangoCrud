@@ -146,6 +146,7 @@ def user_blogs_api(request):
     serializer = BlogSerializer(blogs, many=True)
     return Response(serializer.data)
 
+
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Allow anyone to login
 def login_api(request):
@@ -199,3 +200,49 @@ def signup_api(request):
                 return Response({'message': 'User registration failed.'}, status=400)
 
     return Response({'message': 'Invalid data provided.'}, status=400)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@login_required
+def add_blog_api(request):
+    serializer = BlogSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(author=request.user)
+        return Response(serializer.data, status=201)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+@login_required
+def edit_blog_api(request, blog_id):
+    try:
+        blog = Blog.objects.get(id=blog_id)
+    except Blog.DoesNotExist:
+        return Response({'message': 'Blog not found'}, status=404)
+
+    if blog.author != request.user:
+        return Response({'message': 'Unauthorized'}, status=403)
+
+    serializer = BlogSerializer(instance=blog, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=200)
+    return Response(serializer.errors, status=400)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+@login_required
+def delete_blog_api(request, blog_id):
+    try:
+        blog = Blog.objects.get(id=blog_id)
+    except Blog.DoesNotExist:
+        return Response({'message': 'Blog not found'}, status=404)
+
+    if blog.author != request.user:
+        return Response({'message': 'Unauthorized'}, status=403)
+
+    blog.delete()
+    return Response({'message': 'Blog deleted successfully'}, status=204)
