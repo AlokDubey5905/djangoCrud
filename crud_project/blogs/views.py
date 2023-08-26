@@ -6,9 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import BlogSerializer
+from rest_framework.renderers import JSONRenderer
 
 
 def blog_list(request):
@@ -246,3 +248,16 @@ def delete_blog_api(request, blog_id):
 
     blog.delete()
     return Response({'message': 'Blog deleted successfully'}, status=204)
+
+# view to get the blog by id
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getBlogById(request, blog_id):
+    try:
+        blog = Blog.objects.get(id=blog_id)
+        serializer = BlogSerializer(blog)
+        print(serializer.data)
+        return Response(serializer.data)
+    except Blog.DoesNotExist:
+        return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
