@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/add_blog/', login_required(views.add_blog_api), name='add_blog_api'),
     path('api/edit_blog/<int:blog_id>/', login_required(views.edit_blog_api), name='edit_blog_api'),
     path('api/delete_blog/<int:blog_id>/', login_required(views.delete_blog_api), name='delete_blog_api'),
+    path('api/search/', views.search_blogs, name='search_blogs_api'),
     path('', views.blog_list, name='blog_list'),
     path('userblogs/', views.user_blog_list, name='user_blog_list'),
     path('add/', login_required(views.add_blog), name='add_blog'),

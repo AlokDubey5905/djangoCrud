@@ -252,7 +252,6 @@ def delete_blog_api(request, blog_id):
 # view to get the blog by id
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 def getBlogById(request, blog_id):
     try:
         blog = Blog.objects.get(id=blog_id)
@@ -260,4 +259,16 @@ def getBlogById(request, blog_id):
         print(serializer.data)
         return Response(serializer.data)
     except Blog.DoesNotExist:
+        return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(['GET'])
+def search_blogs(request):
+    query = request.GET.get('query')
+    if query:
+        print('Django')
+        print(query)
+        blogs = Blog.objects.filter(content__icontains=query)
+        serializer = BlogSerializer(blogs, many=True)
+        return Response(serializer.data)
+    else:
         return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
