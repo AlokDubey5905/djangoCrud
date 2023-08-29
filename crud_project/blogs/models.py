@@ -25,4 +25,12 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.title
+        return self.text
+
+    @property
+    def author_first_name(self):
+        return self.author.first_name
+
+    @property
+    def author_last_name(self):
+        return self.author.last_name
