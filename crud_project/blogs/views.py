@@ -161,7 +161,7 @@ def login_api(request):
         login(request, user)
         return Response({'message': 'User logged in successfully.'}, status=200)
     else:
-        return Response({'error': 'Invalid username or password.'}, status=401)
+        return Response({'message': 'Invalid username or password.'}, status=401)
 
 
 @api_view(['POST'])
@@ -179,6 +179,8 @@ def current_user_api(request):
     user_data = {
         'is_authenticated': True,
         'username': request.user.username,
+        'first_name':request.user.first_name,
+        'last_name':request.user.last_name,
     }
     return Response(user_data)
 
@@ -191,15 +193,17 @@ def signup_api(request):
     if request.method == 'POST':
         username = request.data.get('username')
         password = request.data.get('password')
+        first_name=request.data.get('first_name')
+        last_name=request.data.get('last_name')
 
         if username and password:
             try:
                 user = User.objects.create_user(
-                    username=username, password=password)
+                    username=username, password=password,first_name=first_name,last_name=last_name)
                 login(request, user)
                 return Response({'message': 'User registered and logged in successfully.'})
             except:
-                return Response({'message': 'User registration failed.'}, status=400)
+                return Response({'message': 'Username already taken!!'}, status=400)
 
     return Response({'message': 'Invalid data provided.'}, status=400)
 
@@ -281,6 +285,7 @@ class PublicCommentListView(generics.ListAPIView):
 
     def get_queryset(self):
         blog_id = self.kwargs['blog_id']
+        print(Comment.objects.filter(blog__id=blog_id))
         return Comment.objects.filter(blog__id=blog_id)
 
 
@@ -291,6 +296,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
     def get_queryset(self):
         # Assuming the URL parameter is named 'blog_id'
         blog_id = self.kwargs.get('blog_id')
+        print(Comment.objects.filter(blog=blog_id))
         return Comment.objects.filter(blog=blog_id)
 
     def perform_create(self, serializer):
@@ -300,6 +306,7 @@ class CommentListCreateView(generics.ListCreateAPIView):
 class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+    print('comment',serializer_class)
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
 
 
