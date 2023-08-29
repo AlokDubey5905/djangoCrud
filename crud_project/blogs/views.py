@@ -1,16 +1,16 @@
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import Blog
+from .models import Blog, Comment
 from .forms import BlogForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login, authenticate, logout, get_user_model
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import BlogSerializer
-from rest_framework.renderers import JSONRenderer
+from .serializers import BlogSerializer, CommentSerializer
+from .permissions import IsOwnerOrReadOnly
 
 
 def blog_list(request):
@@ -251,6 +251,7 @@ def delete_blog_api(request, blog_id):
 
 # view to get the blog by id
 
+
 @api_view(['GET'])
 def getBlogById(request, blog_id):
     try:
@@ -260,6 +261,7 @@ def getBlogById(request, blog_id):
         return Response(serializer.data)
     except Blog.DoesNotExist:
         return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET'])
 def search_blogs(request):
@@ -272,3 +274,36 @@ def search_blogs(request):
         return Response(serializer.data)
     else:
         return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class PublicCommentListView(generics.ListAPIView):
+    serializer_class = CommentSerializer
+
+    def get_queryset(self):
+        blog_id = self.kwargs['blog_id']
+        return Comment.objects.filter(blog__id=blog_id)
+
+
+class CommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Assuming the URL parameter is named 'blog_id'
+        blog_id = self.kwargs.get('blog_id')
+        return Comment.objects.filter(blog=blog_id)
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
+
+
+class CommentUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated, IsOwnerOrReadOnly]
