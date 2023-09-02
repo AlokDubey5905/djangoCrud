@@ -161,7 +161,7 @@ def login_api(request):
         login(request, user)
         return Response({'message': 'User logged in successfully.'}, status=200)
     else:
-        return Response({'message': 'Invalid username or password.'}, status=401)
+        return Response({'message': 'Invalid username or password!!'}, status=401)
 
 
 @api_view(['POST'])
@@ -264,7 +264,7 @@ def getBlogById(request, blog_id):
         print(serializer.data)
         return Response(serializer.data)
     except Blog.DoesNotExist:
-        return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Blog not found!!"}, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
@@ -277,7 +277,7 @@ def search_blogs(request):
         serializer = BlogSerializer(blogs, many=True)
         return Response(serializer.data)
     else:
-        return Response({"detail": "Blog not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"detail": "Blog not found!!"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PublicCommentListView(generics.ListAPIView):
